@@ -8,11 +8,10 @@
 #' @param thresh threshold canopy closure (kgC)
 #' @return derivative of forest growth over time
 #'
-forest_growth = function(Time, C, parms) {
+forest_growth = function(time, C, parms) {
   
   # compute forest growth
-  dC = ifelse(C < parms$thresh, parms$r*C, parms$g)
-  dC = ifelse(C >= parms$thresh, parms$g*(1-(C/parms$K)))
+  dC = ifelse(C < parms$thresh, parms$r*C, parms$g*(1-(C/parms$K)))
   
   return(list(dC))
 }

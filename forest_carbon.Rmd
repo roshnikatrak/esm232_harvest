@@ -1,0 +1,114 @@
+---
+title: "forest_growth"
+author: "Steven Cognac"
+date: '2022-05-12'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(deSolve)
+library(tidyverse)
+library(sensitivity)
+library(here)
+source(here("R/forest_growth.R"))
+```
+
+```{r}
+forest_growth
+```
+
+
+```{r}
+# initialize df
+tm = seq(from=1, to=300)
+forest_initial=10
+
+
+metrics = list(K=250, r=0.01, g=2, thresh=50)
+
+growth = ode(y=forest_initial,
+          times=tm, 
+          func=forest_growth, 
+          parms=metrics)
+
+
+colnames(growth)=c("time","carbon")
+
+ggplot(as.data.frame(growth),aes(time, carbon))+
+  geom_line()
+```
+
+
+```{r sobel_parameters}
+
+K = rnorm(mean=250, sd=25, n=300)
+r = rnorm(mean=0.01, sd=0.001, n=300)
+g = rnorm(mean=2, sd=0.2, n=300)
+
+X1 = cbind.data.frame(r=r, K=K, g=g)
+
+# repeat to get our second set of samples
+K = rnorm(mean=250, sd=25, n=300)
+r = rnorm(mean=0.01, sd=0.001, n=300)
+g = rnorm(mean=2, sd=0.2, n=300)
+
+X2 = cbind.data.frame(r=r, K=K, g=g)
+
+
+# create our sobel object and get sets ofparameters for running the model
+sens_P = sobolSalt(model = NULL, X1,X2, nboot = 300)
+
+# rename columns
+colnames(sens_P$X) = c("r", "K", "g")
+
+```
+
+Run Sobol Analysis
+```{r}
+# gets results for 200 years (evaluating every year)
+simtimes = seq(from=1, to=300)
+
+metrics = list(r = as.data.frame(sens_P$X[1,"r"]), 
+             K = as.data.frame(sens_P$X[1,"K"]),
+             g = as.data.frame(sens_P$X[1,"g"]))
+
+```
+
+```{r}
+result = ode(y=forest_initial, 
+             times=simtimes, 
+             func=forest_growth, 
+             parms=metrics)
+
+result = as.data.frame(result)
+
+# rename columns
+colnames(result)=c("time","C")
+
+ggplot(result, aes(time, C)) +
+  geom_point()
+
+```
+
+
+
+```{r metrics}
+# turn computing our metrics into a function
+compute_metrics = function(result) {
+  max_forest = max(result$C)
+  idx1 = which.max(result$C)
+  maxyear = result$time[idx1]
+  
+  mean_forest = mean(results$C)
+  
+  
+return(list(max_forest=max_forest,
+            maxyear=maxyear, 
+            mean_forest=mean_forest))}
+
+# try it on our first parameter set
+compute_metrics(result)
+
+```
