@@ -129,9 +129,9 @@ p_wrapper <- function(r, g, canopy_threshold, K, Cinitial, years, func) {
   
   parms <- list(r = r, g = g, canopy_threshold = canopy_threshold, K = K)
   result <- ode(y = Cinitial, 
-                 times = years, 
-                 func = func, 
-                 parms = parms,
+                times = years,
+                func = func,
+                parms = parms,
                 method = "lsode")
   colnames(result) <- c("year", "carbon")
   
@@ -182,58 +182,9 @@ maxC_S <- sens_C_maxC$S %>%
   geom_col(aes(x = original, y = parameters))
 maxC_S
 
-plot(sens_C_maxC)
+# plot(sens_C_maxC)
 
 sens_C_meanC = sensitivity::tell(sens_C, allres$meanC)
-plot(sens_C_meanC)
+# plot(sens_C_meanC)
 ```
 
-```{r}
-sens_C_meanC$S
-```
-
-
-
-
-
-Run Sobol Analysis
-```{r}
-# gets results for 200 years (evaluating every year)
-simtimes = seq(from=1, to=300)
-
-metrics = list(r = as.data.frame(sens_C$X[1,"r"]),
-               K = as.data.frame(sens_C$X[1,"K"]),
-               g = as.data.frame(sens_C$X[1,"g"]),
-               canopy_threshold = as.data.frame(sens_C$X[1, "canopy_threshold"]))
-
-```
-
-
-
-
-
-```{r}
-result = ode(y=forest_initial,
-             times=simtimes, 
-             func=forest_growth, 
-             parms=metrics)
-
-result = as.data.frame(result)
-
-# rename columns
-colnames(result)=c("time","C")
-
-ggplot(result, aes(time, C)) +
-  geom_point()
-
-```
-
-
-
-```{r metrics}
-
-
-# try it on our first parameter set
-compute_metrics(result)
-
-```

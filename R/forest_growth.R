@@ -8,6 +8,12 @@
 #' @param canopy_threshold threshold canopy closure (kgC)
 #' @return derivative of forest growth over time
 #'
+#' @param thresh threshold canopy closure (kgC)
+#' @return derivative of forest growth over time (dC)
+
+
+# forest growth model
+
 forest_growth = function(time, C, parms) {
   
   # compute forest growth
