@@ -248,3 +248,4 @@ ggplot(data = sens_C_meanC_T, aes(x = parameter, y = original))+
 
 ## In 2-3 sentences, discuss what the results of your simulation might mean for climate change impacts on forest growth (e.g think about what parameters climate change might influence).
 
+For the max forest size, our results indicate that the most influential parameters were carrying capacity (K) and exponential growth rate (r), and for the mean forest size, the most influential parameter was exponential growth rate. Climate change may influence these parameters; for instance, as temperatures rise and drought conditions are exacerbated, trees may experience stunted growth and additional stress, which in turn may lower their carbon carrying capacities.
