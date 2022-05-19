@@ -1,8 +1,8 @@
 ---
-title: "forest_growth"
-author: "Steven Cognac"
+title: "Forest Growth Model"
+author: "Steven Cognac, Charles Hendrickson, & Roshni Katrak-Adefowora"
 date: '2022-05-12'
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -50,7 +50,6 @@ forest_growth
  - g = 2 kg/year (linear growth rate after canopy closure)
 
 ```{r initial_conditions}
-
 years = seq(from = 1, to = 300)
 
 Cinitial = 10
@@ -107,7 +106,6 @@ colnames(sens_C$X) = c("r", "K", "g", "canopy_threshold")
 head(sens_C$X)
 ```
 
-
 ## Create two functions to compute metrics. Then, run the ODE solver to compute metrics with wrapper function.
 
 ```{r}
@@ -141,9 +139,7 @@ p_wrapper <- function(r, g, canopy_threshold, K, Cinitial, years, func) {
   return(metrics)
   
 }
-
 ```
-
 
 ```{r}
 # now use pmap as we did before
@@ -155,7 +151,6 @@ allres <-  allresults %>%
   map_dfr(`[`,c("maxC","meanC"))
 ```
 
-
 ```{r plot_results}
 # create boxplots
 tmp <- allres %>% 
@@ -165,26 +160,91 @@ tmp <- allres %>%
 
 
 ggplot(tmp, aes(metric, value, col=metric)) +
-  geom_boxplot()
+  geom_boxplot()+
+  theme_bw()
 ```
-
 
 Compute the sobol indicies for each metric
 
 ```{r sen3}
 # sobol can only handle one output at a time  - so we will need to do them separately
 
+# compute sobol indicies for maxC
 sens_C_maxC = sensitivity::tell(sens_C, allres$maxC)
 
-maxC_S <- sens_C_maxC$S %>% 
+# prepare data frames for plotting maxC first order indices and total indices
+# first order indices
+sens_C_maxC_S <- sens_C_maxC$S %>% 
   rowid_to_column("parameters") %>% 
-  ggplot() +
-  geom_col(aes(x = original, y = parameters))
-maxC_S
+  mutate(parameter = case_when(parameters == "1" ~ "exponential growth rate",
+                               parameters == "2" ~ "carrying capacity",
+                               parameters == "3" ~ "linear growth rate", 
+                               parameters == "4" ~ "canopy threshold"))
 
-# plot(sens_C_maxC)
+# total indices
+sens_C_maxC_T <- sens_C_maxC$T %>% 
+  rowid_to_column("parameters") %>% 
+  mutate(parameter = case_when(parameters == "1" ~ "exponential growth rate",
+                               parameters == "2" ~ "carrying capacity",
+                               parameters == "3" ~ "linear growth rate", 
+                               parameters == "4" ~ "canopy threshold"))
 
+# compute sobol indicies for meanC
 sens_C_meanC = sensitivity::tell(sens_C, allres$meanC)
-# plot(sens_C_meanC)
+
+# prepare data frames for plotting meanC first order indices and total indices
+# first order indices
+sens_C_meanC_S <- sens_C_meanC$S %>% 
+  rowid_to_column("parameters") %>% 
+  mutate(parameter = case_when(parameters == "1" ~ "exponential growth rate",
+                               parameters == "2" ~ "carrying capacity",
+                               parameters == "3" ~ "linear growth rate", 
+                               parameters == "4" ~ "canopy threshold"))
+
+# total indices
+sens_C_meanC_T <- sens_C_meanC$T %>% 
+  rowid_to_column("parameters") %>% 
+  mutate(parameter = case_when(parameters == "1" ~ "exponential growth rate",
+                               parameters == "2" ~ "carrying capacity",
+                               parameters == "3" ~ "linear growth rate", 
+                               parameters == "4" ~ "canopy threshold"))
 ```
+
+Plot sobol indices
+
+```{r}
+# plot maxC first order index
+ggplot(data = sens_C_maxC_S, aes(x = parameter, y = original))+
+  geom_col(fill = "#8D366A")+
+  theme_bw()+
+  labs(title = "Max C First Order Sobol Index",
+       x = "Parameters",
+       y = "Sobol Score")
+
+# plot maxC total index
+ggplot(data = sens_C_maxC_T, aes(x = parameter, y = original))+
+  geom_col(fill = "#8D366A")+
+  theme_bw()+
+  labs(title = "Max C Total Sobol Index",
+       x = "Parameters",
+       y = "Sobol Score")
+
+# plot meanC first order index
+ggplot(data = sens_C_meanC_S, aes(x = parameter, y = original))+
+  geom_col(fill = "#36698D")+
+  theme_bw()+
+  labs(title = "Mean C First Order Sobol Index",
+       x = "Parameters",
+       y = "Sobol Score")
+
+# plot meanC total index
+ggplot(data = sens_C_meanC_T, aes(x = parameter, y = original))+
+  geom_col(fill = "#36698D")+
+  theme_bw()+
+  labs(title = "Mean C Total Sobol Index",
+       x = "Parameters",
+       y = "Sobol Score")
+```
+
+## In 2-3 sentences, discuss what the results of your simulation might mean for climate change impacts on forest growth (e.g think about what parameters climate change might influence).
 
