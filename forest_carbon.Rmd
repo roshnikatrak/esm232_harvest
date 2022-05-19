@@ -68,7 +68,7 @@ colnames(carbon_growth)=c("year","carbon")
 ggplot(as.data.frame(carbon_growth),aes(year, carbon))+
   geom_line(size = 2, linetype = "longdash") +
   labs(title = "Modeled Forest Size",
-       subtitle = paste0("initial forest size = 10 kg carbon, r = 0.01 kg/year, g = 2 kg/year, \ncanopy threshold = 50 kg carbon, carrying capacity = 250 kg carbon"),
+       subtitle = paste0("initial forest size = 10 kg carbon, r = 0.01 kg/year, \ng = 2 kg/year, canopy threshold = 50 kg carbon, \ncarrying capacity = 250 kg carbon"),
        x = "Years",
        y = "Forest Size (kg carbon)") +
   theme(title = element_text(size = 20))
